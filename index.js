@@ -1,10 +1,7 @@
 import express, { json } from 'express'; // server
 import cors from 'cors';
 import dotenv from 'dotenv'; // environment variables
-import joi from 'joi' // data validation
-import bcrypt from 'bcrypt'; // data encrypting
 
-import database from './database.js';
 import router from './routes/.router.js'
 
 const app = express(); // create a server
@@ -15,30 +12,7 @@ app.use(json()); // middleware
 app.use(cors()); // middleware
 app.use(router);
 
-// validation -> joi
-const signUpSchema = joi.object({
-    name: joi.string()
-        .alphanum()
-        .min(3)
-        .max(50)
-        .required(),
-    email: joi.string()
-        .email()
-        .required(),
-    password: joi.string()
-        .required(),
-    confirmPassword: joi.ref('password')
-});
-
-const signInSchema = joi.object({
-    email: joi.string()
-        .email()
-        .required(),
-    password: joi.string()
-        .required()
-});
-
-// register
+/* // register
 async function signUp(req,res) {
 
     const {name, email, password, confirmPassword} = req.body; // parser
@@ -65,7 +39,7 @@ async function signUp(req,res) {
         return res.sendStatus(500);
 
     }
-}
+} */
 
 const port = process.env.PORT || 5000; // establishing the port -> production or development
 
