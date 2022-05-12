@@ -1,48 +1,59 @@
-import express, { json } from 'express';
+import express, { json } from 'express'; // server
 import cors from 'cors';
-import { MongoClient } from "mongodb";
-import dotenv from "dotenv";
-import joi from 'joi'
-import bcrypt from 'bcrypt';
-//import dayjs from 'dayjs'; 
+import dotenv from 'dotenv'; // environment variables
+import joi from 'joi' // data validation
+import bcrypt from 'bcrypt'; // data encrypting
+
+import database from './database.js';
+import router from './routes/.router.js'
 
 const app = express(); // create a server
-app.use(json()); // middleware
-app.use(cors());
+
 dotenv.config();
 
-// connect MongoDB
-let db = null;
-const mongoClient = new MongoClient(process.env.MONGO_URL);
-const promise = mongoClient.connect();
-promise.then(() => {
-    db = mongoClient.db(process.env.DATABASE);
-    console.log("MongoDB database connected");
+app.use(json()); // middleware
+app.use(cors()); // middleware
+app.use(router);
+
+// validation -> joi
+const signUpSchema = joi.object({
+    name: joi.string()
+        .alphanum()
+        .min(3)
+        .max(50)
+        .required(),
+    email: joi.string()
+        .email()
+        .required(),
+    password: joi.string()
+        .required(),
+    confirmPassword: joi.ref('password')
 });
-promise.catch((error) => console.log("Error connecting to database", error));
+
+const signInSchema = joi.object({
+    email: joi.string()
+        .email()
+        .required(),
+    password: joi.string()
+        .required()
+});
 
 // register
-app.post('/sign-up', (req, res) => {
-    // validation -> joi
-    const signUpSchema = joi.object({
-        name: joi.string().required(),
-        email: joi.email().required(),
-        password: joi.string().required(),
-        confirmPassword: joi.ref('password')
-    });
+async function signUp(req,res) {
+
+    const {name, email, password, confirmPassword} = req.body; // parser
+    const {error} = signUpSchema.validate(req.body, {abortEarly: false});
 
     // error
-    const {error} = signUpSchema.validate(req.body, {abortEarly: false});
     if(error) {
         return res.status(422).send(error.details.map(detail => detail.message)); // unprocessable entity
     }
 
     // store data in the database
     try {
-        const {name, email, password} = req.body; // parser
         const SALT = 10;
         const hashPassword = bcrypt.hashSync(password, SALT); // encrypting password
-        await db.collection("users").insertOne({
+        await database.collection("users").insertOne({
             name,
             email,
             password: hashPassword
@@ -52,9 +63,9 @@ app.post('/sign-up', (req, res) => {
         console.log("Error creating new user");
         console.log(error);
         return res.sendStatus(500);
-    }
 
-})
+    }
+}
 
 const port = process.env.PORT || 5000; // establishing the port -> production or development
 
