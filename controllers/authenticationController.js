@@ -52,7 +52,7 @@ export async function signOut(req, res) {
 
     try {
         await database.collection('sessions').deleteOne({ token });
-        return res.sendStatus(200);
+        res.sendStatus(200);
     } catch (error) {
         console.log('Error logging out', error);
         return res.sendStatus(500);
