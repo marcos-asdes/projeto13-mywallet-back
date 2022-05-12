@@ -1,7 +1,7 @@
 import joi from 'joi' // data validation
 
 // validation -> joi
-export const transactionsSchema = joi.object({
+const transactionsSchema = joi.object({
     type: joi.string()
         .required(),
     description: joi.string()
@@ -9,3 +9,5 @@ export const transactionsSchema = joi.object({
     value: joi.number()
         .required()
 });
+
+export default transactionsSchema;

@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 
 import database from '../database.js';
 
-import transactionsSchema from "../schemas/transactionsSchema.js";
+import transactionsSchema from "./../schemas/transactionsSchema.js";
 
 export async function getTransactions(req, res) {
     const { user } = res.locals;
